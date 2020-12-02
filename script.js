@@ -4,11 +4,14 @@ const MOVIE_SALES =
 const VIDEO_GAME_DATA =
     "https://cdn.freecodecamp.org/testable-projects-fcc/data/tree_map/video-game-sales-data.json";
 
+const KICKSTARTED_PLEDGES =
+    "https://cdn.freecodecamp.org/testable-projects-fcc/data/tree_map/kickstarter-funding-data.json";
+
 // set the dimensions and margins of the graph
 var margin = { top: 10, right: 10, bottom: 10, left: 10 },
     width = 800 - margin.left - margin.right,
     height = 600 - margin.top - margin.bottom,
-    legendHeight = 200;
+    legendHeight = 300;
 
 // append the svg object to the body of the page
 var svg = d3
@@ -21,7 +24,7 @@ var svg = d3
 
 var color = d3.scaleOrdinal(d3.schemeCategory10);
 
-d3.json(VIDEO_GAME_DATA).then((data) => {
+d3.json(KICKSTARTED_PLEDGES).then((data) => {
     // store all the video game categories
     let categories = data.children.map((d) => d.name);
 
@@ -61,14 +64,50 @@ d3.json(VIDEO_GAME_DATA).then((data) => {
         })
         .attr("fill-opacity", 0.6);
 
+    // create a tooltip
+    var tooltip = d3
+        .select("#root")
+        .append("div")
+        .attr("id", "tooltip")
+        .style("opacity", 0);
+
+    // action when mouse lands on tile
+    tile.on("mouseover", function (d) {
+        let name = d.target.getAttribute("data-name");
+        let category = d.target.getAttribute("data-category");
+        let value = d.target.getAttribute("data-value");
+
+        tooltip.attr("data-value", value);
+
+        tooltip
+            .html(
+                "Name: " +
+                    name +
+                    "<br/>" +
+                    "Category: " +
+                    category +
+                    "<br/>" +
+                    "Value: " +
+                    value
+            )
+            .style("left", d.pageX + "px")
+            .style("top", d.pageY - 28 + "px");
+
+        // make tooltip visible
+        tooltip.transition().duration(200).style("opacity", 0.9);
+    });
+
+    // make tooltip disappear on mouse out
+    tile.on("mouseout", function (d) {
+        tooltip.transition().duration(500).style("opacity", 0);
+    });
+
     // legend title
     svg.append("text")
         .style("font-weight", "bold")
         .attr("x", 0)
         .attr("y", height + margin.top + margin.bottom + 5)
         .text("Legend");
-
-    let j = 0;
 
     // create g for each legend item
     var legendItem = svg
@@ -90,7 +129,7 @@ d3.json(VIDEO_GAME_DATA).then((data) => {
             let rowNo = parseInt(i % (length / divFactor));
 
             // distance between columns
-            let distanceFactor = 150;
+            let distanceFactor = 250;
 
             return (
                 "translate(" +
