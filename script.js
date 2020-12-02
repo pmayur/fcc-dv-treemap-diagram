@@ -24,7 +24,12 @@ var svg = d3
 
 var color = d3.scaleOrdinal(d3.schemeCategory10);
 
-d3.json(KICKSTARTED_PLEDGES).then((data) => {
+d3.json(VIDEO_GAME_DATA).then((data) => {
+
+    // add text to title and description
+    d3.select("#title").append("p").text(data.name);
+    d3.select("#description").append("p").text("Treemap for " + data.name);
+
     // store all the video game categories
     let categories = data.children.map((d) => d.name);
 
