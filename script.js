@@ -22,6 +22,9 @@ var svg = d3
 var color = d3.scaleOrdinal(d3.schemeCategory10);
 
 d3.json(VIDEO_GAME_DATA).then((data) => {
+    // store all the video game categories
+    let categories = data.children.map((d) => d.name);
+
     // Give the data to this cluster layout:
     var root = d3.hierarchy(data).sum(function (d) {
         return d.value; // Here the size of each leave is given in the 'value' field in input data
@@ -38,7 +41,6 @@ d3.json(VIDEO_GAME_DATA).then((data) => {
         .append("rect")
         .attr("class", "tile")
         .attr("x", function (d, i) {
-            if (i == 1) console.log(d.data);
             return d.x0;
         })
         .attr("y", function (d) {
@@ -58,4 +60,64 @@ d3.json(VIDEO_GAME_DATA).then((data) => {
             return color(d.data.name);
         })
         .attr("fill-opacity", 0.6);
+
+    // legend title
+    svg.append("text")
+        .style("font-weight", "bold")
+        .attr("x", 0)
+        .attr("y", height + margin.top + margin.bottom + 5)
+        .text("Legend");
+
+    let j = 0;
+
+    // create g for each legend item
+    var legendItem = svg
+        .selectAll(".legend-item")
+        .data(categories)
+        .enter()
+        .append("g")
+        .attr("id", "legend")
+        .attr("x", 0)
+        .attr("y", height + margin.top + margin.bottom)
+        .attr("transform", function (d, i) {
+            let length = categories.length;
+            let divFactor = 3;
+
+            // gives 0,1 or 2 to divide legend into columns
+            let colNo = parseInt(i / (length / divFactor));
+
+            // gives 0,1,2,3,4,5 to arrange into rows
+            let rowNo = parseInt(i % (length / divFactor));
+
+            // distance between columns
+            let distanceFactor = 150;
+
+            return (
+                "translate(" +
+                colNo * distanceFactor +
+                ", " +
+                (rowNo * 25 + 625) +
+                ")"
+            );
+        });
+
+    // legend rectangle
+    legendItem
+        .append("rect")
+        .attr("class", "legend-item")
+        .attr("width", 20)
+        .attr("height", 20)
+        .style("fill", function (d) {
+            return color(d);
+        })
+        .attr("fill-opacity", 0.6);
+
+    // legend text
+    legendItem
+        .append("text")
+        .attr("x", 25)
+        .attr("y", 15)
+        .text(function (d) {
+            return d;
+        });
 });
